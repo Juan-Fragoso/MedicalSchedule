@@ -16,7 +16,7 @@ namespace Data.Repositories
         }
 
         public async Task<IEnumerable<Doctor>> GetAllAsync() => await _contex.Doctors.Include(d => d.Specialty).ToListAsync();
-        public async Task<Doctor?> GetByIdAsync(int id) => await _contex.Doctors.Include(d => d.Specialty).FirstOrDefaultAsync(d => d.DoctorId == id);
+        public async Task<Doctor?> GetByIdAsync(int id) => await _contex.Doctors.Include(d => d.Specialty).Include(d => d.Schedules).FirstOrDefaultAsync(d => d.DoctorId == id);
 
         public async Task AddAsync(Doctor doctor) => await _contex.Doctors.AddAsync(doctor);
         public void Update(Doctor doctor) => _contex.Doctors.Update(doctor);
