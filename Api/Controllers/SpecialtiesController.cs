@@ -48,7 +48,7 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Specialty>> PostSpecialty(Specialty specialty)
         {
-            var result = await _specialtyService.createAsync(specialty);
+            var result = await _specialtyService.CreateAsync(specialty);
 
             if(!result)
             {

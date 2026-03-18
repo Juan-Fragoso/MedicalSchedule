@@ -19,7 +19,7 @@ namespace Services
 
         public async Task<Specialty?> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
 
-        public async Task<bool> createAsync(Specialty specialty)
+        public async Task<bool> CreateAsync(Specialty specialty)
         {
             await _repository.AddAsync(specialty);
 

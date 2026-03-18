@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Models.Entities
 {
@@ -14,7 +15,7 @@ namespace Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Propiedades de navegación
-        public Specialty Specialty { get; set; } = null!;
+        public Specialty? Specialty { get; set; } = null!;
         public ICollection<DoctorSchedule> Schedules { get; set; } = new List<DoctorSchedule>();
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }

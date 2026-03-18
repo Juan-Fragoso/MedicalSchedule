@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Models.Entities
 {
@@ -15,6 +16,7 @@ namespace Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Una especialidad tiene muchos doctores
+        [JsonIgnore]
         public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
     }
 }
