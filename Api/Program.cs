@@ -1,5 +1,8 @@
 using Data;
+using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Models.Interfaces;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +13,10 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Registrar el DbContext de la capa Data
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+// Inyeccion de dependencias con la inteface y la capa de servicio
+builder.Services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
+builder.Services.AddScoped<SpecialtyService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

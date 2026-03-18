@@ -14,7 +14,7 @@ namespace Models.Entities
         public int DurationMinutes { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Relación: Una especialidad tiene muchos doctores
+        // Una especialidad tiene muchos doctores
         public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
     }
 }
