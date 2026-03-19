@@ -16,6 +16,10 @@ namespace Data
         public DbSet<DoctorSchedule> DoctorSchedules { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<Day> Days { get; set; }
+        public DbSet<AppointmentStatus> AppointmentStatuses { get; set; }
+        public DbSet<SystemLog> SystemLog { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
