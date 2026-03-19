@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Models.DTOs;
 using Models.Entities;
 using Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Data.Repositories
 {
@@ -54,5 +56,18 @@ namespace Data.Repositories
 
         public async Task AddAsync(Appointment appointment) => await _context.Appointments.AddAsync(appointment);
         public async Task<bool> SaveChangesAsync() => (await _context.SaveChangesAsync()) > 0;
+
+        public async Task<IEnumerable<DoctorAppointmentResult>> GetAgendaByDoctorAsync(int doctorId, DateTime appointmentDate)
+        {
+            var agenda = await _context.Database
+                .SqlQueryRaw<DoctorAppointmentResult>(
+                    "EXEC [dbo].[GetDoctorAppointments] @doctorId={0}, @appointmentDate={1}",
+                    doctorId,
+                    appointmentDate.ToString("yyyy-MM-dd")
+                )
+                .ToListAsync();
+
+            return agenda;
+        }
     }
 }

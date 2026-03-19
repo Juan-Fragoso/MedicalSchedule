@@ -1,4 +1,5 @@
-﻿using Models.Entities;
+﻿using Models.DTOs;
+using Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Models.Interfaces
         Task<int> GetRecentCancellationsCount(int patientId, int days);
         Task AddAsync(Appointment appointment);
         Task<Appointment?> GetByIdAsync(int appointmentId);
+        Task<IEnumerable<DoctorAppointmentResult>> GetAgendaByDoctorAsync(int doctorId, DateTime date);
         Task<bool> SaveChangesAsync();
     }
 }

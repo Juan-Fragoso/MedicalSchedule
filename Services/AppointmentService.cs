@@ -1,4 +1,5 @@
-﻿using Models.Entities;
+﻿using Models.DTOs;
+using Models.Entities;
 using Models.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -125,5 +126,9 @@ namespace Services
             return suggestions;
         }
 
+        public async Task<IEnumerable<DoctorAppointmentResult>> GetDoctorAgendaAsync(int doctorId, DateTime date)
+        {
+            return await _repository.GetAgendaByDoctorAsync(doctorId, date);
+        }
     }
 }

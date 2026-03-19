@@ -42,5 +42,19 @@ namespace Api.Controllers
 
             return Ok(new { message = result.Message });
         }
+
+        // Obtener agenda del dia
+        [HttpGet("agenda")]
+        public async Task<IActionResult> GetAgenda([FromQuery] int doctorId, [FromQuery] DateTime date)
+        {
+            var agenda = await _service.GetDoctorAgendaAsync(doctorId, date);
+
+            if (agenda == null || !agenda.Any())
+            {
+                return NotFound(new { message = "No hay citas programadas para este médico en la fecha seleccionada." });
+            }
+
+            return Ok(agenda);
+        }
     }
 }
