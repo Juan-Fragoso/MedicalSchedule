@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260319050954_AddMedicalEntities")]
+    [Migration("20260319155824_AddMedicalEntities")]
     partial class AddMedicalEntities
     {
         /// <inheritdoc />
@@ -32,6 +32,9 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AppointmentId"));
+
+                    b.Property<int>("AppointmentStatusId")
+                        .HasColumnType("int");
 
                     b.Property<string>("CancelationReason")
                         .HasColumnType("nvarchar(max)");
@@ -53,10 +56,6 @@ namespace Data.Migrations
 
                     b.Property<DateTime>("StartDateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("AppointmentId");
 

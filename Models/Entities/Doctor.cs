@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Models.Entities
@@ -17,6 +18,8 @@ namespace Models.Entities
         // Propiedades de navegación
         public Specialty? Specialty { get; set; } = null!;
         public ICollection<DoctorSchedule> Schedules { get; set; } = new List<DoctorSchedule>();
+
+        [JsonIgnore]
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
     }
 }
