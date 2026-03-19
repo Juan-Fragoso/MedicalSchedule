@@ -15,6 +15,7 @@ namespace Models.Interfaces
         Task AddAsync(Appointment appointment);
         Task<Appointment?> GetByIdAsync(int appointmentId);
         Task<IEnumerable<DoctorAppointmentResult>> GetAgendaByDoctorAsync(int doctorId, DateTime date);
+        Task<IEnumerable<PatientHistoryDto>> GetPatientHistoryAsync(int patientId);
         Task<bool> SaveChangesAsync();
     }
 }

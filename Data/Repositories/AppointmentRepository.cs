@@ -69,5 +69,14 @@ namespace Data.Repositories
 
             return agenda;
         }
+
+        public async Task<IEnumerable<PatientHistoryDto>> GetPatientHistoryAsync(int patientId)
+        {
+            return await _context.Database
+                .SqlQueryRaw<PatientHistoryDto>(
+                    "EXEC [dbo].[GetPatientHistory] @patientId={0}",patientId
+                )
+                .ToListAsync();
+        }
     }
 }

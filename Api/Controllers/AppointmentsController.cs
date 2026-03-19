@@ -56,5 +56,18 @@ namespace Api.Controllers
 
             return Ok(agenda);
         }
+
+        [HttpGet("patient/{patientId}/history")]
+        public async Task<IActionResult> GetPatientHistory(int patientId)
+        {
+            var history = await _service.GetPatientHistoryAsync(patientId);
+
+            if (history == null || !history.Any())
+            {
+                return NotFound(new { message = "No se encontró historial para este paciente." });
+            }
+
+            return Ok(history);
+        }
     }
 }

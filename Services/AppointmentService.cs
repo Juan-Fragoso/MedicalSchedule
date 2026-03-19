@@ -130,5 +130,9 @@ namespace Services
         {
             return await _repository.GetAgendaByDoctorAsync(doctorId, date);
         }
+        public async Task<IEnumerable<PatientHistoryDto>> GetPatientHistoryAsync(int patientId)
+        {
+            return await _repository.GetPatientHistoryAsync(patientId);
+        }
     }
 }
