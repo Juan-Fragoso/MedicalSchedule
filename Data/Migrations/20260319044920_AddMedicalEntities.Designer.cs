@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260318065042_AddMedicalEntities")]
+    [Migration("20260319044920_AddMedicalEntities")]
     partial class AddMedicalEntities
     {
         /// <inheritdoc />
@@ -65,6 +65,43 @@ namespace Data.Migrations
                     b.HasIndex("PatientId");
 
                     b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("Models.Entities.AppointmentStatus", b =>
+                {
+                    b.Property<int>("AppointmentStatusId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AppointmentStatusId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AppointmentStatusId");
+
+                    b.ToTable("AppointmentStatuses");
+                });
+
+            modelBuilder.Entity("Models.Entities.Day", b =>
+                {
+                    b.Property<int>("DayID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DayID"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DayID");
+
+                    b.ToTable("Days");
                 });
 
             modelBuilder.Entity("Models.Entities.Doctor", b =>
@@ -177,6 +214,26 @@ namespace Data.Migrations
                     b.HasKey("SpecialtyId");
 
                     b.ToTable("Specialties");
+                });
+
+            modelBuilder.Entity("Models.Entities.SystemLog", b =>
+                {
+                    b.Property<int>("SystemLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SystemLogId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SystemLogId");
+
+                    b.ToTable("SystemLog");
                 });
 
             modelBuilder.Entity("Models.Entities.Appointment", b =>
