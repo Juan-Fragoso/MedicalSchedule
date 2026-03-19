@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Models.DTOs
 {
-    public class DoctorAppointmentResult
+    public class DoctorAppointmentDto
     {
         public DateTime AppointmentStartTime { get; set; }
         public DateTime AppointmentEndTime { get; set; }

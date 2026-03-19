@@ -14,7 +14,7 @@ namespace Models.Interfaces
         Task<int> GetRecentCancellationsCount(int patientId, int days);
         Task AddAsync(Appointment appointment);
         Task<Appointment?> GetByIdAsync(int appointmentId);
-        Task<IEnumerable<DoctorAppointmentResult>> GetAgendaByDoctorAsync(int doctorId, DateTime date);
+        Task<IEnumerable<DoctorAppointmentDto>> GetAgendaByDoctorAsync(int doctorId, DateTime date);
         Task<IEnumerable<PatientHistoryDto>> GetPatientHistoryAsync(int patientId);
         Task<bool> SaveChangesAsync();
     }

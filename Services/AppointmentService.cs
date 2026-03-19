@@ -126,7 +126,7 @@ namespace Services
             return suggestions;
         }
 
-        public async Task<IEnumerable<DoctorAppointmentResult>> GetDoctorAgendaAsync(int doctorId, DateTime date)
+        public async Task<IEnumerable<DoctorAppointmentDto>> GetDoctorAgendaAsync(int doctorId, DateTime date)
         {
             return await _repository.GetAgendaByDoctorAsync(doctorId, date);
         }

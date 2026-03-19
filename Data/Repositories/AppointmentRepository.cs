@@ -57,10 +57,10 @@ namespace Data.Repositories
         public async Task AddAsync(Appointment appointment) => await _context.Appointments.AddAsync(appointment);
         public async Task<bool> SaveChangesAsync() => (await _context.SaveChangesAsync()) > 0;
 
-        public async Task<IEnumerable<DoctorAppointmentResult>> GetAgendaByDoctorAsync(int doctorId, DateTime appointmentDate)
+        public async Task<IEnumerable<DoctorAppointmentDto>> GetAgendaByDoctorAsync(int doctorId, DateTime appointmentDate)
         {
             var agenda = await _context.Database
-                .SqlQueryRaw<DoctorAppointmentResult>(
+                .SqlQueryRaw<DoctorAppointmentDto>(
                     "EXEC [dbo].[GetDoctorAppointments] @doctorId={0}, @appointmentDate={1}",
                     doctorId,
                     appointmentDate.ToString("yyyy-MM-dd")
