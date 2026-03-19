@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260319044920_AddMedicalEntities")]
+    [Migration("20260319050954_AddMedicalEntities")]
     partial class AddMedicalEntities
     {
         /// <inheritdoc />
@@ -141,7 +141,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DayOfWeek")
+                    b.Property<int>("DayId")
                         .HasColumnType("int");
 
                     b.Property<int>("DoctorId")

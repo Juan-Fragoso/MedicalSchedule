@@ -9,7 +9,7 @@ namespace Models.Entities
     {
         public int DoctorScheduleId { get; set; }
         public int DoctorId { get; set; }
-        public int DayOfWeek { get; set; }
+        public int DayId { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;

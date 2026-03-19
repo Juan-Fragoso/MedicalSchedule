@@ -138,7 +138,7 @@ namespace Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DayOfWeek")
+                    b.Property<int>("DayId")
                         .HasColumnType("int");
 
                     b.Property<int>("DoctorId")
