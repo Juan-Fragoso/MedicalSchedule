@@ -40,6 +40,11 @@ namespace Data.Repositories
                             && a.CreatedAt >= limitDate);
         }
 
+        public async Task<Appointment?> GetByIdAsync(int id)
+        {
+            return await _context.Appointments.FindAsync(id);
+        }
+
         public async Task AddAsync(Appointment appointment) => await _context.Appointments.AddAsync(appointment);
         public async Task<bool> SaveChangesAsync() => (await _context.SaveChangesAsync()) > 0;
     }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Models.DTOs;
 using Models.Entities;
 using Services;
 
@@ -25,12 +26,15 @@ namespace Api.Controllers
             return Ok(new { message = result.Message, data = result.Data });
         }
 
-        [HttpPut("{id}/cancel")]
-        public async Task<IActionResult> Cancel(int id, [FromBody] string reason)
+        [HttpPatch("cancel")]
+        public async Task<IActionResult> Cancel([FromBody] CancelAppointmentDto request)
         {
-            // Supongamos que implementas CancelAsync en el servicio
-            // Este cambiaría AppointmentStatusId a 3 y guardaría CancelationReason
-            return Ok(new { message = "Cita cancelada." });
+            // El controlador ahora recibe el objeto estructurado
+            var result = await _service.CancelAppointmentAsync(request.AppointmentId, request.CancelationReason);
+
+            if (!result.Success) return BadRequest(new { message = result.Message });
+
+            return Ok(new { message = result.Message });
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Models.Interfaces
         Task<bool> ValidateAvailabilityAsync(int doctorId, DateTime start, DateTime end, int dayId);
         Task<int> GetRecentCancellationsCount(int patientId, int days);
         Task AddAsync(Appointment appointment);
+        Task<Appointment?> GetByIdAsync(int appointmentId);
         Task<bool> SaveChangesAsync();
     }
 }

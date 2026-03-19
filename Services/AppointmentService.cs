@@ -68,6 +68,22 @@ namespace Services
             return (true, "Cita agendada correctamente. " + alert, new { appointment, alert });
         }
 
+        public async Task<(bool Success, string Message)> CancelAppointmentAsync(int appointmentId, string reason)
+        {
+            var appointment = await _repository.GetByIdAsync(appointmentId);
+            if (appointment == null)
+                return (false, "La cita no existe.");
+
+            var cancelledStatus = await _appointmentStatus.GetByNameAsync("Cancelada");
+
+            appointment.AppointmentStatusId = (cancelledStatus != null) ? cancelledStatus.AppointmentStatusId : 6;
+            appointment.CancelationReason = reason;
+
+            await _repository.SaveChangesAsync();
+
+            return (true, "Cita cancelada exitosamente. El horario ahora está disponible.");
+        }
+
         // Funcion de sugerencias de dias disponibles
         private async Task<List<DateTime>> GetSuggestions(Doctor doctor, DateTime start, int duration)
         {
