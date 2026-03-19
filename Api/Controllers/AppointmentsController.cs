@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs;
 using Models.Entities;
@@ -68,6 +69,21 @@ namespace Api.Controllers
             }
 
             return Ok(history);
+        }
+
+        [HttpGet("availableAgenda")]
+        public async Task<IActionResult> GetAvailableAgenda([FromQuery] int doctorId, [FromQuery] DateTime date)
+        {
+            var result = await _service.GetAvailableAppointmentAsync(doctorId, date);
+
+            if (!result.Success)
+                return BadRequest(new { message = result.Message });
+
+            return Ok(new
+            {
+                message = result.Message,
+                availableSlots = result.Data
+            });
         }
     }
 }

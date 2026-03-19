@@ -91,7 +91,7 @@ namespace Services
         }
 
         // Funcion de sugerencias de dias disponibles
-        private async Task<List<DateTime>> GetSuggestions(Doctor doctor, DateTime start, int duration)
+        public async Task<List<DateTime>> GetSuggestions(Doctor doctor, DateTime start, int duration)
         {
             var suggestions = new List<DateTime>();
             var currentCheck = start;
@@ -133,6 +133,24 @@ namespace Services
         public async Task<IEnumerable<PatientHistoryDto>> GetPatientHistoryAsync(int patientId)
         {
             return await _repository.GetPatientHistoryAsync(patientId);
+        }
+
+        public async Task<(bool Success, string Message, object? Data)> GetAvailableAppointmentAsync(int doctorId, DateTime date)
+        {
+            // Validación: No agendar en el pasado
+            if (date <= DateTime.Now)
+                return (false, "No se pueden agendar citas en el pasado.", null);
+
+            // Obtener Doctor para Duración
+            var doctor = await _doctorRepository.GetByIdAsync(doctorId);
+            if (doctor == null) return (false, "El médico no existe.", null);
+
+            // Preparar datos para el SP
+            int duration = doctor.Specialty.DurationMinutes;
+
+            var suggestions = await GetSuggestions(doctor, date, duration);
+
+            return (true, "Horarios Disponibles ", suggestions);
         }
     }
 }
