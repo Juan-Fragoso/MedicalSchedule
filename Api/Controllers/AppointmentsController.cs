@@ -13,6 +13,12 @@ namespace Api.Controllers
         private readonly AppointmentService _service;
         public AppointmentsController(AppointmentService service) => _service = service;
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllAppointments()
+        {
+            var appointments = await _service.GetAllAppointmentsAsync();
+            return Ok(appointments); 
+        }
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Appointment appointment)
         {

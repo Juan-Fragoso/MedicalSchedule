@@ -7,6 +7,7 @@ namespace Models.Interfaces
 {
     public interface IAppointmentRepository
     {
+        Task<IEnumerable<Appointment>> GetAllAsync();
         // Validacion disponibilidad del doctor
         Task<bool> ValidateAvailabilityAsync(int doctorId, DateTime start, DateTime end, int dayId);
         Task<int> GetRecentCancellationsCount(int patientId, int days);

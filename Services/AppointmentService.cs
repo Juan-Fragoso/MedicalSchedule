@@ -20,6 +20,11 @@ namespace Services
             _appointmentStatus = appointmentStatus;
         }
 
+        public async Task<IEnumerable<Appointment>> GetAllAppointmentsAsync()
+        {
+            return await _repository.GetAllAsync();
+        }
+
         // Agendar Cita
         public async Task<(bool Success, string Message, object? Data)> CreateAppointmentAsync(Appointment appointment)
         {

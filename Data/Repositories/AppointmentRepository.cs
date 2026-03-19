@@ -14,6 +14,13 @@ namespace Data.Repositories
         {
             _context = context;
         }
+        public async Task<IEnumerable<Appointment>> GetAllAsync()
+        {
+            return await _context.Appointments
+                .Include(a => a.Doctor)     
+                .ToListAsync();
+        }
+
         public async Task<bool> ValidateAvailabilityAsync(int doctorId, DateTime start, DateTime end, int dayId)
         {
             // Ejecutamos el SP y obtenemos el resultado del SELECT @result
