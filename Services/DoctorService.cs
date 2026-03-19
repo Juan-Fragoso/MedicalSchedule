@@ -26,7 +26,15 @@ namespace Services
                 return false;
             }
 
-            // 2. Validar Horarios (Lógica de Negocio Senior)
+            // 1. Validar que los DayId sean únicos
+            var uniqueDaysCount = doctor.Schedules.Select(s => s.DayId).Distinct().Count();
+
+            if (uniqueDaysCount != doctor.Schedules.Count())
+            {
+                return false;
+            }
+
+            // 2. Validar Horarios
             foreach (var schedule in doctor.Schedules)
             {
                 if (schedule.StartTime >= schedule.EndTime)
@@ -52,8 +60,17 @@ namespace Services
             // Lógica Condicional para Horarios
             if (doctor.Schedules != null && doctor.Schedules.Any())
             {
+                // 1. Validar que los DayId sean únicos
+                var uniqueDaysCount = doctor.Schedules.Select(s => s.DayId).Distinct().Count();
+
+                if (uniqueDaysCount != doctor.Schedules.Count())
+                {
+                    return false;
+                }
+
                 // Limpiar los horarios actuales 
                 existingDoctor.Schedules.Clear();
+
 
                 // Agregar los nuevos horarios del JSON
                 foreach (var newSchedule in doctor.Schedules)
