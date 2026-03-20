@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Models.Interfaces
 {
@@ -13,5 +14,7 @@ namespace Models.Interfaces
         void Update(Patient patient);
         Task DeleteAsync(int id);
         Task<bool> SaveChangesAsync();
+        Task<IDbContextTransaction> BeginTransactionAsync(); 
+        void ClearTracker();
     }
 }

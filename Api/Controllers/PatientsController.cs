@@ -28,17 +28,26 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Patient>> Post(Patient patient)
         {
-            var result = await _patientService.CreateAsync(patient);
-            if (!result) return BadRequest();
+            var (success, message) = await _patientService.CreateAsync(patient);
+            if (!success) return BadRequest(new { message });
+
             return CreatedAtAction(nameof(Get), new { id = patient.PatientId }, patient);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Patient patient)
+        [HttpPut]
+        public async Task<IActionResult> Put(Patient patient)
         {
-            if (id != patient.PatientId) return BadRequest();
-            var result = await _patientService.UpdateAsync(patient);
-            return result ? Ok(new { message = "Paciente actualizado." }) : NotFound();
+            if (patient.PatientId <= 0) return BadRequest(new { message = "ID inválido." });
+
+            var (success, message) = await _patientService.UpdateAsync(patient);
+
+            if (!success)
+            {
+                if (message.Contains("no encontrado")) return NotFound(new { message });
+                return BadRequest(new { message });
+            }
+
+            return Ok(new { message });
         }
 
         [HttpDelete("{id}")]
