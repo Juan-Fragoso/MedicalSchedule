@@ -44,11 +44,11 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Doctor>> PostDoctor(Doctor doctor)
         {
-            var result = await _doctorService.CreateAsync(doctor);
+            var (success, message) = await _doctorService.CreateAsync(doctor);
 
-            if(!result)
+            if(!success)
             {
-                return BadRequest(new { message = "No se pudo registrar el doctor" });
+                return BadRequest(new { message });
             }
 
             return CreatedAtAction(nameof(GetDoctor), new { id = doctor.DoctorId }, doctor);

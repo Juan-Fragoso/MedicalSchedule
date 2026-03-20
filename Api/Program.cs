@@ -30,6 +30,8 @@ builder.Services.AddScoped<AppointmentService>();
 builder.Services.AddScoped<IAppointmentStatus, AppointmentStatusRepository>();
 builder.Services.AddScoped<AppointmentService>();
 
+builder.Services.AddScoped<ILogRepository, LogRepository>();
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

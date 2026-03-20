@@ -10,42 +10,67 @@ namespace Services
     {
         private readonly IDoctorRepository _repository;
         private readonly ISpecialtyRepository _specialtyRepository;
-        public DoctorService(IDoctorRepository repository, ISpecialtyRepository specialtyRepository)
+        private readonly ILogRepository _logRepository;
+        public DoctorService(IDoctorRepository repository, ISpecialtyRepository specialtyRepository, ILogRepository logRepository)
         {
             _repository = repository;
             _specialtyRepository = specialtyRepository;
+            _logRepository = logRepository;
         }
 
         public async Task<IEnumerable<Doctor>> GetAllAsync() => await _repository.GetAllAsync();
         public async Task<Doctor?> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
-        public async Task<bool> CreateAsync(Doctor doctor)
+
+        public async Task<(bool Success, string Message)> CreateAsync(Doctor doctor)
         {
-            var specialty = await _specialtyRepository.GetByIdAsync(doctor.SpecialtyId);
-            if (specialty == null)
-            {
-                return false;
-            }
+            // Iniciamos una transacción
+            using var transaction = await _repository.BeginTransactionAsync();
 
-            // 1. Validar que los DayId sean únicos
-            var uniqueDaysCount = doctor.Schedules.Select(s => s.DayId).Distinct().Count();
-
-            if (uniqueDaysCount != doctor.Schedules.Count())
+            try
             {
-                return false;
-            }
-
-            // 2. Validar Horarios
-            foreach (var schedule in doctor.Schedules)
-            {
-                if (schedule.StartTime >= schedule.EndTime)
+                var specialty = await _specialtyRepository.GetByIdAsync(doctor.SpecialtyId);
+                if (specialty == null)
                 {
-                    return false;
+                    return (false, "La especialidad proporcionada no existe.");
                 }
+
+                // 1. Validar que los DayId sean únicos
+                var uniqueDaysCount = doctor.Schedules.Select(s => s.DayId).Distinct().Count();
+
+                if (uniqueDaysCount != doctor.Schedules.Count())
+                {
+                    return (false, "No puedes asignar múltiples horarios al mismo día de la semana.");
+                }
+
+                // 2. Validar Horarios
+                foreach (var schedule in doctor.Schedules)
+                {
+                    if (schedule.StartTime >= schedule.EndTime)
+                    {
+                        return (false, $"El horario del día {schedule.DayId} es inválido: la hora de inicio debe ser menor a la de fin.");
+                    }
+                }
+
+                await _repository.AddAsync(doctor);
+
+                var saved = await _repository.SaveChangesAsync();
+
+                if (!saved) return (false, "Ocurrió un error inesperado al guardar en la base de datos.");
+
+                await transaction.CommitAsync();
+
+                return (true, "Doctor registrado exitosamente.");
             }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
 
-            await _repository.AddAsync(doctor);
+                // Registramos el error en tu tabla SystemLog
+                string errorMessage = $"Error al crear Doctor: {ex.Message} | StackTrace: {ex.StackTrace}";
+                await _logRepository.AddLogAsync(errorMessage);
 
-            return await _repository.SaveChangesAsync();
+                return (false, "Ocurrió un error interno. El incidente ha sido reportado.");
+            }
         }
         public async Task<bool> UpdateAsync(Doctor doctor)
         {

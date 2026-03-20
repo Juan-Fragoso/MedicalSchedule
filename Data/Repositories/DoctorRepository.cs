@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Models.Entities;
 using Models.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Data.Repositories
 {
@@ -14,7 +15,7 @@ namespace Data.Repositories
         {
             _contex = contex;
         }
-
+        public async Task<IDbContextTransaction> BeginTransactionAsync() => await _contex.Database.BeginTransactionAsync();
         public async Task<IEnumerable<Doctor>> GetAllAsync() => await _contex.Doctors.Include(d => d.Specialty).ToListAsync();
         public async Task<Doctor?> GetByIdAsync(int id) => await _contex.Doctors.Include(d => d.Specialty).Include(d => d.Schedules).FirstOrDefaultAsync(d => d.DoctorId == id);
 
