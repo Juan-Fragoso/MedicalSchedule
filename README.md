@@ -474,3 +474,18 @@ El sistema cuenta con un bloqueador de errores global. Cualquier fallo técnico 
 Transaccionalidad: Todas las operaciones de escritura utilizan BeginTransactionAsync. Si algo falla, se realiza un Rollback automático para mantener la integridad de la base de datos.
 
 Limpieza de Estado: Se implementó ChangeTracker.Clear() para asegurar que los registros de error se guarden correctamente sin arrastrar estados corruptos de la memoria de EF Core.
+
+### Pruebas de Integración (Postman)
+Para esta versión del proyecto, se optó por una estrategia de **Pruebas Manuales de Integración** utilizando Postman.
+
+- **Ciclo de Vida de Citas:** Verificación de bloqueos de horario, cálculo automático de fin de cita y alertas de cancelaciones.
+- **Manejo de Transacciones:** Validación de `Rollback` ante fallos forzados de red o base de datos.
+- **Auditoría:** Confirmación del registro de logs en la tabla `SystemLog` tras excepciones controladas.
+
+> **Nota sobre Pruebas Unitarias:** La arquitectura del proyecto está preparada para la implementación de pruebas unitarias gracias al uso de Inyección de Dependencias y el Patrón Repositorio. Actualmente, el proyecto se entrega con validaciones manuales.
+---
+
+### 📂 Pendientes
+- [ ] **Implementación de Pruebas Unitarias:** Cobertura de lógica de negocio en `DoctorService` y `AppointmentService` usando xUnit.
+- [ ] **Dockerización:** Creación de archivos `Dockerfile` y `docker-compose` para el despliegue rápido del API y SQL Server.
+- [ ] **Frontend Web:** Desarrollo de un dashboard en Blazor o React para la gestión visual de la agenda.
