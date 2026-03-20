@@ -18,6 +18,9 @@ El sistema se desarrolló siguiendo una Arquitectura en Capas (N-Tier Architectu
 
 * Capa de Modelos: Entidades de base de datos e interfaces compartidas.
 
+## Modelo de Datos (Diagrama ER)
+
+![Diagrama de Base de Datos](./Diagram_MedicalSchedule.webp)
 
 ## 🛠️ Especificaciones Técnicas
 IDE: Visual Studio 2026 (Versión 18.3.0)
