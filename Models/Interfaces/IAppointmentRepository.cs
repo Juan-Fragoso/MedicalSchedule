@@ -1,4 +1,5 @@
-﻿using Models.DTOs;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using Models.DTOs;
 using Models.Entities;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,7 @@ namespace Models.Interfaces
         Task<IEnumerable<DoctorAppointmentDto>> GetAgendaByDoctorAsync(int doctorId, DateTime date);
         Task<IEnumerable<PatientHistoryDto>> GetPatientHistoryAsync(int patientId);
         Task<bool> SaveChangesAsync();
+        Task<IDbContextTransaction> BeginTransactionAsync();
+        void ClearTracker();
     }
 }

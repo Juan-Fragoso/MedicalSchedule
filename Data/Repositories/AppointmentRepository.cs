@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Models.DTOs;
 using Models.Entities;
 using Models.Interfaces;
@@ -78,5 +79,9 @@ namespace Data.Repositories
                 )
                 .ToListAsync();
         }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync() => await _context.Database.BeginTransactionAsync();
+
+        public void ClearTracker() => _context.ChangeTracker.Clear();
     }
 }

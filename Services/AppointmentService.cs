@@ -1,4 +1,5 @@
-﻿using Models.DTOs;
+﻿using Data.Repositories;
+using Models.DTOs;
 using Models.Entities;
 using Models.Interfaces;
 using System;
@@ -13,12 +14,14 @@ namespace Services
         private readonly IAppointmentRepository _repository;
         private readonly IDoctorRepository _doctorRepository;
         private readonly IAppointmentStatus _appointmentStatus;
+        private readonly ILogRepository _logRepository;
 
-        public AppointmentService(IAppointmentRepository repository, IDoctorRepository doctorRepository, IAppointmentStatus appointmentStatus)
+        public AppointmentService(IAppointmentRepository repository, IDoctorRepository doctorRepository, IAppointmentStatus appointmentStatus, ILogRepository logRepository)
         {
             _repository = repository;
             _doctorRepository = doctorRepository;
             _appointmentStatus = appointmentStatus;
+            _logRepository = logRepository;
         }
 
         public async Task<IEnumerable<Appointment>> GetAllAppointmentsAsync()
@@ -29,49 +32,66 @@ namespace Services
         // Agendar Cita
         public async Task<(bool Success, string Message, object? Data)> CreateAppointmentAsync(Appointment appointment)
         {
-            // Validación: No agendar en el pasado
-            if (appointment.StartDateTime <= DateTime.Now)
-                return (false, "No se pueden agendar citas en el pasado.", null);
+            using var transaction = await _repository.BeginTransactionAsync();
 
-            // Obtener Doctor para Duración
-            var doctor = await _doctorRepository.GetByIdAsync(appointment.DoctorId);
-            if (doctor == null) return (false, "El médico no existe.", null);
-
-            // Preparar datos para el SP
-            int duration = doctor.Specialty.DurationMinutes;
-            appointment.EndDateTime = appointment.StartDateTime.AddMinutes(duration);
-
-            // Convertir el día de la semana de .NET (0=Domingo) al estándar del catálogo (7=Domingo)
-            int dayId = (int)appointment.StartDateTime.DayOfWeek;
-            if (dayId == 0) dayId = 7;
-
-            // LLAMAR AL SP (Validación de Horario y Traslapes)
-            bool isAvailable = await _repository.ValidateAvailabilityAsync(
-                appointment.DoctorId,
-                appointment.StartDateTime,
-                appointment.EndDateTime,
-                dayId
-            );
-
-            // Si no hay -> usamos el método de sugerencias
-            if (!isAvailable)
+            try
             {
-                var suggestions = await GetSuggestions(doctor, appointment.StartDateTime, duration);
+                // Validación: No agendar en el pasado
+                if (appointment.StartDateTime <= DateTime.Now)
+                    return (false, "No se pueden agendar citas en el pasado.", null);
 
-                return (false, "El horario no está disponible.", new { suggestedDates = suggestions });
+                // Obtener Doctor para Duración
+                var doctor = await _doctorRepository.GetByIdAsync(appointment.DoctorId);
+                if (doctor == null) return (false, "El médico no existe.", null);
+
+                // Preparar datos para el SP
+                int duration = doctor.Specialty?.DurationMinutes ?? 30;
+                appointment.EndDateTime = appointment.StartDateTime.AddMinutes(duration);
+
+                // Convertir el día de la semana de .NET (0=Domingo) al estándar del catálogo (7=Domingo)
+                int dayId = (int)appointment.StartDateTime.DayOfWeek;
+                if (dayId == 0) dayId = 7;
+
+                // Llamar al SP (Validación de Horario y Traslapes)
+                bool isAvailable = await _repository.ValidateAvailabilityAsync(
+                    appointment.DoctorId,
+                    appointment.StartDateTime,
+                    appointment.EndDateTime,
+                    dayId
+                );
+
+                // Si no hay -> usamos el método de sugerencias
+                if (!isAvailable)
+                {
+                    var suggestions = await GetSuggestions(doctor, appointment.StartDateTime, duration);
+
+                    return (false, "El horario no está disponible.", new { suggestedDates = suggestions });
+                }
+
+                // Alerta de Cancelaciones
+                int cancellations = await _repository.GetRecentCancellationsCount(appointment.PatientId, 30);
+                string alert = cancellations >= 3 ? "ALERTA: Paciente con 3+ cancelaciones recientes." : "";
+
+                var scheduledStatus = await _appointmentStatus.GetByNameAsync("Confirmada");
+                appointment.AppointmentStatusId = (scheduledStatus != null) ? scheduledStatus.AppointmentStatusId : 1;
+
+                await _repository.AddAsync(appointment);
+                await _repository.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return (true, "Cita agendada correctamente. " + alert, new { appointmentId = appointment.AppointmentId, alert });
             }
+            catch (Exception ex)
+            {
+                // 12. Rollback y Log de error
+                await transaction.RollbackAsync();
+                _repository.ClearTracker();
 
-            // Alerta de Cancelaciones
-            int cancellations = await _repository.GetRecentCancellationsCount(appointment.PatientId, 30);
-            string alert = cancellations >= 3 ? "ALERTA: Paciente con 3+ cancelaciones recientes." : "";
+                await _logRepository.AddLogAsync($"Error al agendar cita (Doctor: {appointment.DoctorId}, Paciente: {appointment.PatientId}): {ex.Message}");
 
-            var scheduledStatus = await _appointmentStatus.GetByNameAsync("Confirmada");
-            appointment.AppointmentStatusId = (scheduledStatus != null) ? scheduledStatus.AppointmentStatusId : 1;
-
-            await _repository.AddAsync(appointment);
-            await _repository.SaveChangesAsync();
-
-            return (true, "Cita agendada correctamente. " + alert, new { appointment, alert });
+                return (false, "Ocurrió un error técnico al procesar la cita. Intente de nuevo.", null);
+            }
         }
 
         public async Task<(bool Success, string Message)> CancelAppointmentAsync(int appointmentId, string reason)
