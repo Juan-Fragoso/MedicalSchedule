@@ -8,6 +8,7 @@ namespace Models.Interfaces
 {
     public interface IDoctorRepository
     {
+        void ClearTracker();
         Task<IDbContextTransaction> BeginTransactionAsync();
         Task<IEnumerable<Doctor>> GetAllAsync();
         Task<Doctor?> GetByIdAsync(int id);

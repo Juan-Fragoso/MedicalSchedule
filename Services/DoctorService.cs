@@ -1,4 +1,5 @@
-﻿using Models.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Models.Entities;
 using Models.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -65,51 +66,84 @@ namespace Services
             {
                 await transaction.RollbackAsync();
 
+                _repository.ClearTracker();
+
                 // Registramos el error en tu tabla SystemLog
-                string errorMessage = $"Error al crear Doctor: {ex.Message} | StackTrace: {ex.StackTrace}";
+                string errorMessage = $"Error al crear Doctor: {ex.Message}";
                 await _logRepository.AddLogAsync(errorMessage);
 
                 return (false, "Ocurrió un error interno. El incidente ha sido reportado.");
             }
         }
-        public async Task<bool> UpdateAsync(Doctor doctor)
+        public async Task<(bool Success, string Message)> UpdateAsync(Doctor doctor)
         {
-            var existingDoctor = await _repository.GetByIdAsync(doctor.DoctorId);
-
-            if (existingDoctor == null) return false;
-
-            // Actualizar datos Doctor
-            existingDoctor.FullName = doctor.FullName;
-            existingDoctor.SpecialtyId = doctor.SpecialtyId;
-
-            // Lógica Condicional para Horarios
-            if (doctor.Schedules != null && doctor.Schedules.Any())
+            using var transaction = await _repository.BeginTransactionAsync();
+            try
             {
-                // 1. Validar que los DayId sean únicos
-                var uniqueDaysCount = doctor.Schedules.Select(s => s.DayId).Distinct().Count();
+                var existingDoctor = await _repository.GetByIdAsync(doctor.DoctorId);
+                if (existingDoctor == null) return (false, "El médico no existe en el sistema.");
 
-                if (uniqueDaysCount != doctor.Schedules.Count())
+                var specialty = await _specialtyRepository.GetByIdAsync(doctor.SpecialtyId);
+                if (specialty == null)
                 {
-                    return false;
+                    return (false, "La especialidad seleccionada no es válida.");
                 }
 
-                // Limpiar los horarios actuales 
-                existingDoctor.Schedules.Clear();
+                // Actualizar datos Doctor
+                existingDoctor.FullName = doctor.FullName;
+                existingDoctor.SpecialtyId = doctor.SpecialtyId;
 
-
-                // Agregar los nuevos horarios del JSON
-                foreach (var newSchedule in doctor.Schedules)
+                // Lógica Condicional para Horarios
+                if (doctor.Schedules != null && doctor.Schedules.Any())
                 {
-                    if (newSchedule.StartTime < newSchedule.EndTime)
+                    // 1. Validar que los DayId sean únicos
+                    var uniqueDaysCount = doctor.Schedules.Select(s => s.DayId).Distinct().Count();
+
+                    if (uniqueDaysCount != doctor.Schedules.Count())
                     {
-                        existingDoctor.Schedules.Add(newSchedule);
+                        return (false, "No puedes asignar múltiples horarios al mismo día.");
+                    }
+
+                    // Validar Horas (Inicio < Fin)
+                    foreach (var schedule in doctor.Schedules)
+                    {
+                        if (schedule.StartTime >= schedule.EndTime)
+                            return (false, $"Horario inválido para el día {schedule.DayId}.");
+                    }
+
+                    // Limpiar los horarios actuales 
+                    existingDoctor.Schedules.Clear();
+
+                    // Agregar los nuevos horarios del JSON
+                    foreach (var newSchedule in doctor.Schedules)
+                    {
+                        if (newSchedule.StartTime < newSchedule.EndTime)
+                        {
+                            existingDoctor.Schedules.Add(newSchedule);
+                        }
                     }
                 }
-            }
 
-            // ejecutar los DELETE de los viejos y los INSERT de los nuevos en una sola transacción
-            _repository.Update(existingDoctor);
-            return await _repository.SaveChangesAsync();
+                // ejecutar los DELETE de los viejos y los INSERT de los nuevos en una sola transacción
+                _repository.Update(existingDoctor);
+                var saved = await _repository.SaveChangesAsync();
+
+                if (!saved) return (false, "No se detectaron cambios para actualizar.");
+
+                await transaction.CommitAsync();
+
+                return (true, "Datos del médico actualizados correctamente.");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                
+                // Limpiar el rastreador a través del repositorio
+                _repository.ClearTracker();
+
+                await _logRepository.AddLogAsync($"Error en UpdateDoctor: {ex.Message}");
+                return (false, "Error interno al intentar actualizar el médico.");
+            }
         }
         public async Task<bool> DeleteAsync(int id)
         {

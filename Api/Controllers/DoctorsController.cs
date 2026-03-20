@@ -54,22 +54,25 @@ namespace Api.Controllers
             return CreatedAtAction(nameof(GetDoctor), new { id = doctor.DoctorId }, doctor);
         }
 
-        // Put: api/doctors/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDoctor(int id, Doctor doctor)
+        // Put: api/doctors
+        [HttpPut]
+        public async Task<IActionResult> PutDoctor(Doctor doctor)
         {
-            if(id != doctor.DoctorId)
+            if (doctor.DoctorId <= 0)
             {
-                return BadRequest(new { message = "El id no coincide con un registro" });
+                return BadRequest(new { message = "Se requiere un ID de doctor válido en el cuerpo de la solicitud." });
             }
 
-            var result = await _doctorService.UpdateAsync(doctor);
-            if (!result)
+            var (success, message) = await _doctorService.UpdateAsync(doctor);
+
+            if (!success)
             {
-                return NotFound();
+                if (message.Contains("no existe")) return NotFound(new { message });
+
+                return BadRequest(new { message });
             }
 
-            return Ok(new { message = "Doctor actualizada" });
+            return Ok(new { message });
         }
 
         //Delete: api/doctors/5

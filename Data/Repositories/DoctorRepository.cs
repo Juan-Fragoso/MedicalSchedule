@@ -31,5 +31,9 @@ namespace Data.Repositories
         }
 
         public async Task<bool> SaveChangesAsync() => (await _contex.SaveChangesAsync() > 0);
+        public void ClearTracker()
+        {
+            _contex.ChangeTracker.Clear();
+        }
     }
 }
